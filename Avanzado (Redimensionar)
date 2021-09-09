@@ -1,0 +1,18 @@
+1- Agregamos un disco/particion a un PV
+  LiMinCinn ~ # pvcreate /dev/sdb1
+  Physical volume "/dev/sdb1" successfully created
+
+2- Redimensionar el tamaño del VG
+  LiMinCinn ~ # vgextend myvolgrp /dev/sdb1
+  Podemos reducir el tamaño de un grupo de volúmenes con el comando vgreduce
+
+3- Aumentar el tamaño de un LV
+  LiMinCinn ~ # lvextend -L +9,9GB /dev/mapper/myvolgrp-lvhome
+  o
+  LiMinCinn ~ # lvresize -L +9,9GB /dev/mapper/myvolgrp-lvhome
+  Si lo que hemos hecho es lo anterior, es decir, extender un LV deberemos de extender también su sistema de archivos:
+  LiMinCinn ~ # resize2fs /dev/mapper/myvolgrp-lvhome
+  IMPORTANTE: Para redimensionar el tamaño del LV no es necesario desmontar el volumen pero SI para redimensionar el tamaño del sistema de archivos
+  
+4- Reducir el tamaño de un LV
+  LiMinCinn ~ # resize2fs /dev/mapper/myvolgrp-lvhome 4G
