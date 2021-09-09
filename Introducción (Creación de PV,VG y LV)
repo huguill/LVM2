@@ -1,0 +1,45 @@
+Logical Volume Manager o LVM no es mas que una forma de crear y administrar particiones virtuales de disco proporcionada por una función del kernel llamada Device-mapper.
+
+Los bloques principales que conforman LVM son:
+  Los volúmenes físicos o physical volumen (PV).
+  Los grupos de volúmenes o volume group (VG).
+  Los volúmenes lógicos o logical volume (LV).
+
+Usar LVM2 (comandos ejecutados como root)
+1- Instalamos el paquete lvm2
+  apt-get install lvm2    ## Debian
+2- Ver dispositivos disponibles para ser usados con LVM
+  root@LiMinCinn ~ # lvmdiskscan
+3- Creamos el volúmen físico (PV).
+  LiMinCinn ~ # pvcreate /dev/sdb1
+4- Ver en detalle como quedo nuestro PV.
+  LiMinCinn ~ # pvdisplay
+5- Ahora vamos a crear el grupo de volúmenes (VG)
+  LiMinCinn ~ # vgcreate myvolgrp /dev/sdb1
+6- Vemos el detalle de como queda nuestro VG
+  LiMinCinn ~ # vgdisplay
+7- Creamos los volúmenes lógicos (LV)
+  LiMinCinn ~ # lvcreate -L 15G myvolgrp -n lvroot
+  donde -L es el tamañan en GB.
+        myvolgrp es el nombre del VG
+        -n inficamos el nombre del LV
+        adicionamente se puede indicar en que PV se desea crear:
+        LiMinCinn ~ # lvcreate -L 15G myvolgrp -n lvroot /dev/sdb2
+8- Si deseamos usar todo el tamaña del VG usamos
+  LiMinCinn ~ # lvcreate -l +100%FREE myvolgrp -n lvopt
+9- Para ver el detalle de nuestro/s LV
+  LiMinCinn ~ # lvdisplay
+10- Ahora ya tenemos nuestras tres particiones, para hacer uso de ellas deberemos de formatearlas y posteriormente montarlas en el sistema.
+Para formatear una partición lógicamente deberemos de saber cual y donde se encuentra. Por defecto LVM crea las particiones bajo /dev/mapper/<nombre_grupo_volumen>-<nombre_volumen_logico> y /dev/<nombre_grupo_volumen>.
+  LiMinCinn ~ # mkfs.ext4 /dev/mapper/myvolgrp-lvroot
+11- Ahora montaremos los volúmenes lógicos en los directorios correspondientes
+  LiMinCinn ~ # mount /dev/mapper/myvolgrp-lvroot /
+  
+  
+  NOTA: Si no nos aparece los dispositivos quizás necesitemos cargar el módulo dm-mod y activarlos:
+    LiMinCinn ~ # modprobe dm-mod    ## Cargamos el módulo
+    LiMinCinn ~ # vgscan    ## Buscamos los grupos de volúmenes
+    Reading all physical volumes. This may take a while...
+    Found volume group "myvolgrp" using metadata type lvm2
+    LiMinCinn ~ # vgchange -ay    ## Activamos los grupos de volúmenes
+    3 logical volume(s) in volume group "myvolgrp" now active
